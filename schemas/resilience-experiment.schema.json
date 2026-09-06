@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a2zsoc.com/schemas/agentresilience/experiment-1.0.json",
+  "title": "AgentResilience experiment",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "business_process", "transaction", "faults", "invariants", "recovery_objectives"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "id": {"type": "string", "minLength": 1},
+    "business_process": {"type": "string", "minLength": 1},
+    "baseline_latency_ms": {"type": "number", "minimum": 0},
+    "reconciliation_latency_ms": {"type": "number", "minimum": 0},
+    "transaction": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["customer_id", "amount", "approval_id", "idempotency_key"],
+      "properties": {
+        "customer_id": {"type": "string", "minLength": 1},
+        "amount": {"type": "number", "exclusiveMinimum": 0},
+        "approval_id": {"type": "string", "minLength": 1},
+        "idempotency_key": {"type": "string", "minLength": 1}
+      }
+    },
+    "faults": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type"],
+        "properties": {
+          "type": {"enum": ["response_delay_after_commit", "duplicate_delivery", "token_expiry", "telemetry_outage", "tool_schema_drift", "mcp_unavailable"]},
+          "duration_ms": {"type": "number", "minimum": 0},
+          "delay_ms": {"type": "number", "minimum": 0}
+        }
+      }
+    },
+    "invariants": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"enum": ["single_refund", "amount_matches_approval", "approval_continuity", "idempotency_present", "notification_after_commit", "single_notification", "trace_reconstructable", "rto_met", "rpo_met", "financial_variance_zero"]}
+    },
+    "recovery_objectives": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rto_ms", "rpo_transactions", "maximum_financial_variance"],
+      "properties": {
+        "rto_ms": {"type": "number", "minimum": 0},
+        "rpo_transactions": {"type": "integer", "minimum": 0},
+        "maximum_financial_variance": {"type": "number", "minimum": 0}
+      }
+    }
+  }
+}

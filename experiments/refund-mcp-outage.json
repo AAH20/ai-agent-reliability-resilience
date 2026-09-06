@@ -1,0 +1,7 @@
+{
+  "schema_version":"1.0","id":"REFUND-MCP-OUTAGE-001","business_process":"customer-refund","reconciliation_latency_ms":200,
+  "transaction":{"customer_id":"C-101","amount":250,"approval_id":"APR-2026-772","idempotency_key":"refund-order-9002"},
+  "faults":[{"type":"mcp_unavailable","duration_ms":500}],
+  "invariants":["single_refund","approval_continuity","notification_after_commit","single_notification","trace_reconstructable","rto_met","rpo_met","financial_variance_zero"],
+  "recovery_objectives":{"rto_ms":1000,"rpo_transactions":0,"maximum_financial_variance":0}
+}

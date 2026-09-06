@@ -1,0 +1,12 @@
+{
+  "schema_version":"1.0","id":"REFUND-PARTIAL-SUCCESS-001","business_process":"customer-refund","baseline_latency_ms":100,"reconciliation_latency_ms":200,
+  "transaction":{"customer_id":"C-100","amount":750,"approval_id":"APR-2026-771","idempotency_key":"refund-order-9001"},
+  "faults":[
+    {"type":"response_delay_after_commit","delay_ms":500},
+    {"type":"duplicate_delivery"},
+    {"type":"token_expiry"},
+    {"type":"telemetry_outage","duration_ms":600}
+  ],
+  "invariants":["single_refund","amount_matches_approval","approval_continuity","idempotency_present","notification_after_commit","single_notification","trace_reconstructable","rto_met","rpo_met","financial_variance_zero"],
+  "recovery_objectives":{"rto_ms":1000,"rpo_transactions":0,"maximum_financial_variance":0}
+}

@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python -m pip install -e .
+      - run: python -m unittest discover -s tests -v
+      - name: Safe partial-success experiment
+        run: |
+          agentresilience run experiments/refund-partial-success.json \
+            --output /tmp/report.json \
+            --junit /tmp/report.xml \
+            --sarif /tmp/report.sarif \
+            --brief /tmp/report.md
+      - name: Safe dependency-outage experiment
+        run: agentresilience run experiments/refund-mcp-outage.json --output /tmp/outage.json
+      - name: Schema-drift experiment
+        run: agentresilience run experiments/refund-schema-drift.json --output /tmp/schema-drift.json
+      - name: Aggregate KPIs and economics
+        run: |
+          agentresilience metrics /tmp/report.json /tmp/outage.json /tmp/schema-drift.json --output /tmp/metrics.json
+          agentresilience economics fixtures/economics.json --output /tmp/economics.json
+      - name: Negative control must fail closed
+        run: |
+          if agentresilience run experiments/refund-partial-success.json --unsafe-idempotency --output /tmp/unsafe.json; then
+            echo "negative control unexpectedly passed"
+            exit 1
+          fi
+          grep -q DUPLICATE_SIDE_EFFECT /tmp/unsafe.json
+
+  container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t agentresilience:test .
+      - run: docker run --rm agentresilience:test

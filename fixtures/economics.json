@@ -1,0 +1,6 @@
+{
+  "analysis_period_months":12,"completed_experiments":24,"recovered_transactions":180,"engineering_hours":240,"review_hours":80,"loaded_hourly_cost":95,"infrastructure_cost":12000,"model_cost":6000,
+  "annual_failure_frequency":12,"integrity_failure_probability_baseline":0.08,"integrity_failure_probability_residual":0.01,"probable_impact":250000,
+  "manual_reconciliation_hours_avoided":300,"value_per_minute":500,"downtime_minutes_avoided":240,"downtime_attribution_factor":0.5,
+  "direct_revenue_enabled":0,"contributory_revenue":500000,"attribution_factor":0.15,"additional_reviews":8,"qualification_rate":0.25,"average_contract_value":100000
+}
