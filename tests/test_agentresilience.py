@@ -8,6 +8,7 @@ from agentresilience.engine import load_experiment, run
 from agentresilience.exporters import junit, markdown, sarif
 from agentresilience.metrics import summarize
 from agentresilience.journeys import JourneyEvent, JourneyStore, load_jsonl
+from agentresilience.doctor import scan
 
 ROOT=Path(__file__).parents[1]
 
@@ -90,6 +91,15 @@ class AgentResilienceTests(unittest.TestCase):
     def test_journey_event_normalizes_timestamp_to_utc(self):
         event=JourneyEvent.from_dict({"event_id":"1","trace_id":"t","occurred_at":"2026-09-07T10:00:00+02:00","workflow":"w","status":"started"})
         self.assertEqual(event.occurred_at,"2026-09-07T08:00:00+00:00")
+
+    def test_doctor_detects_framework_and_missing_reliability_evidence(self):
+        report=scan(ROOT/"examples")
+        self.assertIn("openai-agents",report["frameworks_detected"])
+        self.assertEqual({finding["rule_id"] for finding in report["findings"]},{"AR001","AR002"})
+        self.assertIn("not proof",report["claim_boundary"])
+
+    def test_doctor_fingerprint_is_deterministic(self):
+        self.assertEqual(scan(ROOT/"examples")["fingerprint_sha256"],scan(ROOT/"examples")["fingerprint_sha256"])
 
 
 if __name__=="__main__": unittest.main()

@@ -9,6 +9,7 @@ from .engine import load_experiment, run
 from .exporters import dumps, junit, markdown, sarif
 from .metrics import summarize
 from .journeys import JourneyStore, load_jsonl
+from .doctor import scan
 
 
 def write(path: str, content: str) -> None: Path(path).write_text(content)
@@ -22,6 +23,7 @@ def main() -> None:
     economics=sub.add_parser("economics"); economics.add_argument("inputs"); economics.add_argument("--output",required=True)
     ingest=sub.add_parser("ingest",help="ingest privacy-minimized journey events into SQLite"); ingest.add_argument("events"); ingest.add_argument("--db",required=True); ingest.add_argument("--output",required=True)
     journeys=sub.add_parser("journeys",help="report observed outcomes and estimated exposure"); journeys.add_argument("--db",required=True); journeys.add_argument("--output",required=True)
+    doctor=sub.add_parser("doctor",help="inspect Python agent tools for reliability evidence"); doctor.add_argument("path",nargs="?",default="."); doctor.add_argument("--output",required=True); doctor.add_argument("--fail-on-findings",action="store_true")
     args=parser.parse_args()
     if args.command=="economics": write(args.output,dumps(calculate(json.loads(Path(args.inputs).read_text())))); return
     if args.command=="metrics": write(args.output,dumps(summarize([json.loads(Path(p).read_text()) for p in args.reports]))); return
@@ -35,6 +37,10 @@ def main() -> None:
         try: result=store.report()
         finally: store.close()
         write(args.output,dumps(result)); return
+    if args.command=="doctor":
+        result=scan(args.path); write(args.output,dumps(result))
+        if args.fail_on_findings and result["finding_count"]: raise SystemExit(2)
+        return
     result=run(load_experiment(args.experiment),args.unsafe_idempotency); write(args.output,dumps(result))
     if args.junit: write(args.junit,junit(result)+"\n")
     if args.sarif: write(args.sarif,dumps(sarif(result)))

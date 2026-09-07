@@ -36,6 +36,14 @@ jobs:
         run: |
           agentresilience metrics /tmp/report.json /tmp/outage.json /tmp/schema-drift.json --output /tmp/metrics.json
           agentresilience economics fixtures/economics.json --output /tmp/economics.json
+      - name: Doctor must detect the deliberately unsafe example
+        run: |
+          if agentresilience doctor examples --output /tmp/doctor.json --fail-on-findings; then
+            echo "doctor negative control unexpectedly passed"
+            exit 1
+          fi
+          grep -q AR001 /tmp/doctor.json
+          grep -q AR002 /tmp/doctor.json
       - name: Negative control must fail closed
         run: |
           if agentresilience run experiments/refund-partial-success.json --unsafe-idempotency --output /tmp/unsafe.json; then

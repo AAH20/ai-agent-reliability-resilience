@@ -51,6 +51,9 @@ agentresilience economics fixtures/economics.json --output economics.json
 agentresilience ingest examples/journey-events.jsonl \
   --db journey.db --output ingestion.json
 agentresilience journeys --db journey.db --output journey-report.json
+
+# Discover reliability evidence missing from Python agent tools.
+agentresilience doctor path/to/agent --output doctor-report.json
 ```
 
 To prove the detector is active, deliberately disable destination idempotency. The command exits non-zero and reports `DUPLICATE_SIDE_EFFECT`:
@@ -64,6 +67,8 @@ No third-party Python dependency is required at runtime. Experiments and reports
 
 See the [journey outcome ledger](docs/JOURNEY-LEDGER.md) for its event contract,
 privacy boundary and fifteen-minute first-run path.
+See [AgentResilience Doctor](docs/DOCTOR.md) for supported frameworks, rules,
+CI behavior and the static-analysis claim boundary.
 
 ## Architecture
 
