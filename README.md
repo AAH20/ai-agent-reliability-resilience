@@ -8,6 +8,11 @@
 
 AgentResilience is an open-source reliability lab for testing AI agents that execute consequential business workflows. It injects failures at tool, identity, queue and telemetry boundaries, then reconciles against authoritative destination state. The question is not *did the agent say it succeeded?* It is *did exactly the approved business effect occur, can we prove it, and did recovery meet its objective?*
 
+It also includes a privacy-minimized SQLite journey ledger that correlates
+framework-neutral trace IDs with observed workflow outcomes and separately
+reports caller-declared value exposure. It complements existing tracing tools;
+it does not replace Langfuse, Phoenix, LangSmith or OpenTelemetry.
+
 The first reference workflow is a customer refund because partial success is concrete: a payment can commit while its MCP response times out, an event can redeliver, a token can expire and observability can disappear at the same time. AgentResilience verifies that only one authorized refund occurs, one notification follows it and a reconstructable evidence trail survives.
 
 > This repository contains deterministic synthetic experiments. Results are not observed production performance, certification, an audit opinion or a guarantee of future resilience.
@@ -42,6 +47,10 @@ agentresilience run experiments/refund-partial-success.json \
 agentresilience run experiments/refund-mcp-outage.json --output outage.json
 agentresilience metrics report.json outage.json --output metrics.json
 agentresilience economics fixtures/economics.json --output economics.json
+
+agentresilience ingest examples/journey-events.jsonl \
+  --db journey.db --output ingestion.json
+agentresilience journeys --db journey.db --output journey-report.json
 ```
 
 To prove the detector is active, deliberately disable destination idempotency. The command exits non-zero and reports `DUPLICATE_SIDE_EFFECT`:
@@ -52,6 +61,9 @@ agentresilience run experiments/refund-partial-success.json \
 ```
 
 No third-party Python dependency is required at runtime. Experiments and reports are portable JSON; CI consumers can ingest JUnit and SARIF, while humans receive a Markdown recovery brief.
+
+See the [journey outcome ledger](docs/JOURNEY-LEDGER.md) for its event contract,
+privacy boundary and fifteen-minute first-run path.
 
 ## Architecture
 

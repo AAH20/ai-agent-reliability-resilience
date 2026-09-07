@@ -1,0 +1,4 @@
+{"event_id":"evt-001","trace_id":"trace-checkout-001","occurred_at":"2026-09-07T08:00:00Z","workflow":"customer-checkout","status":"started","expected_value":120.0,"currency":"USD","customer_ref":"sha256:customer-a"}
+{"event_id":"evt-002","trace_id":"trace-checkout-001","occurred_at":"2026-09-07T08:00:03Z","workflow":"customer-checkout","status":"failed","expected_value":120.0,"currency":"USD","failure_category":"mcp_timeout","customer_ref":"sha256:customer-a"}
+{"event_id":"evt-003","trace_id":"trace-checkout-002","occurred_at":"2026-09-07T08:01:00Z","workflow":"customer-checkout","status":"started","expected_value":80.0,"currency":"USD","customer_ref":"sha256:customer-b"}
+{"event_id":"evt-004","trace_id":"trace-checkout-002","occurred_at":"2026-09-07T08:01:02Z","workflow":"customer-checkout","status":"succeeded","expected_value":80.0,"realized_value":80.0,"currency":"USD","customer_ref":"sha256:customer-b"}

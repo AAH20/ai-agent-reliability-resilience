@@ -7,6 +7,7 @@ from agentresilience.economics import calculate
 from agentresilience.engine import load_experiment, run
 from agentresilience.exporters import junit, markdown, sarif
 from agentresilience.metrics import summarize
+from agentresilience.journeys import JourneyEvent, JourneyStore, load_jsonl
 
 ROOT=Path(__file__).parents[1]
 
@@ -61,6 +62,34 @@ class AgentResilienceTests(unittest.TestCase):
         self.assertEqual(first["net_resilience_value"],second["net_resilience_value"])
     def test_economics_are_reconcilable(self):
         result=calculate(json.loads((ROOT/"fixtures/economics.json").read_text())); self.assertEqual(result["gross_resilience_value"]-result["total_program_cost"],result["net_resilience_value"]); self.assertGreater(result["benefit_cost_ratio"],1)
+
+    def test_journey_ledger_is_idempotent_and_reports_exposure(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store=JourneyStore(Path(directory)/"journeys.db")
+            events=load_jsonl(ROOT/"examples/journey-events.jsonl")
+            self.assertEqual(store.ingest(events),{"accepted":4,"duplicates":0})
+            self.assertEqual(store.ingest(events),{"accepted":0,"duplicates":4})
+            report=store.report(); store.close()
+        self.assertEqual(report["journeys_observed"],2)
+        self.assertEqual(report["completion_rate_pct"],50.0)
+        self.assertEqual(report["value_by_currency"],{"USD":{"observed_realized":80.0,"estimated_exposure":120.0}})
+        self.assertEqual(report["failure_categories"],{"mcp_timeout":1})
+
+    def test_journey_event_rejects_negative_value(self):
+        with self.assertRaises(ValueError):
+            JourneyEvent.from_dict({"event_id":"1","trace_id":"t","occurred_at":"2026-09-07T00:00:00Z","workflow":"w","status":"failed","expected_value":-1,"currency":"USD"})
+
+    def test_journey_event_rejects_unknown_status(self):
+        with self.assertRaises(ValueError):
+            JourneyEvent.from_dict({"event_id":"1","trace_id":"t","occurred_at":"2026-09-07T00:00:00Z","workflow":"w","status":"maybe"})
+
+    def test_journey_event_requires_currency_for_value(self):
+        with self.assertRaises(ValueError):
+            JourneyEvent.from_dict({"event_id":"1","trace_id":"t","occurred_at":"2026-09-07T00:00:00Z","workflow":"w","status":"failed","expected_value":1})
+
+    def test_journey_event_normalizes_timestamp_to_utc(self):
+        event=JourneyEvent.from_dict({"event_id":"1","trace_id":"t","occurred_at":"2026-09-07T10:00:00+02:00","workflow":"w","status":"started"})
+        self.assertEqual(event.occurred_at,"2026-09-07T08:00:00+00:00")
 
 
 if __name__=="__main__": unittest.main()
