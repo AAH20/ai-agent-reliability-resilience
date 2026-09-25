@@ -8,6 +8,13 @@
 
 AgentResilience is an open-source reliability lab for testing AI agents that execute consequential business workflows. It injects failures at tool, identity, queue and telemetry boundaries, then reconciles against authoritative destination state. The question is not *did the agent say it succeeded?* It is *did exactly the approved business effect occur, can we prove it, and did recovery meet its objective?*
 
+**Agent Repair Network** adds an offline MCP schema-drift reproducer. Given an operator-supplied incident, it tests a declared argument rename against old and current tool schemas, emits a value-redacted candidate adapter, and can write a transformed call locally for review. [Read its exact scope and contribution flow](docs/REPAIR-NETWORK.md). It does not run a remote tool or claim a production fix.
+
+```bash
+agentresilience repair analyze examples/mcp-schema-rename.json --output /tmp/repair-analysis.json
+agentresilience repair apply examples/mcp-schema-rename.json /tmp/repair-analysis.json --output /tmp/transformed-call.json
+```
+
 It also includes a privacy-minimized SQLite journey ledger that correlates
 framework-neutral trace IDs with observed workflow outcomes and separately
 reports caller-declared value exposure. It complements existing tracing tools;

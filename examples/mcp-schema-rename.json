@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "incident_id": "ticket-close-drift",
+  "tool_name": "close_ticket",
+  "original_schema": {
+    "type": "object",
+    "properties": {
+      "ticket_id": {"type": "string"},
+      "resolution": {"type": "string"}
+    },
+    "required": ["ticket_id", "resolution"],
+    "additionalProperties": false
+  },
+  "current_schema": {
+    "type": "object",
+    "properties": {
+      "case_id": {"type": "string"},
+      "resolution": {"type": "string"}
+    },
+    "required": ["case_id", "resolution"],
+    "additionalProperties": false
+  },
+  "arguments": {
+    "ticket_id": "SYNTHETIC-1001",
+    "resolution": "Synthetic resolution for a fictional ticket"
+  },
+  "renames": {"ticket_id": "case_id"}
+}

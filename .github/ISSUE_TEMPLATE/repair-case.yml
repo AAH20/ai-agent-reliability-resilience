@@ -1,0 +1,37 @@
+name: Repair case
+description: Share a sanitized MCP argument-schema drift that maintainers can reproduce
+title: "[Repair case] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Publish only an anonymized schema-level reproduction. Never include call values, logs, tokens, customer identifiers, private endpoints, or a transformed-call file. The analyzer produces candidates, not a safe production patch.
+  - type: input
+    id: tool
+    attributes:
+      label: Tool name or generic alias
+      placeholder: close_ticket
+    validations:
+      required: true
+  - type: textarea
+    id: change
+    attributes:
+      label: Exact schema change
+      description: State the old and current argument names and types without posting customer values.
+      placeholder: ticket_id:string was renamed to case_id:string
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Sanitized reproduction and analyzer result
+      description: Use synthetic values only; include the relevant candidate/manual-review status and schema errors.
+    validations:
+      required: true
+  - type: textarea
+    id: owner
+    attributes:
+      label: Affected project and maintainer-approved staging test
+      description: Link public source or say what authorized staging environment can verify semantics. Do not share credentials.
+    validations:
+      required: true

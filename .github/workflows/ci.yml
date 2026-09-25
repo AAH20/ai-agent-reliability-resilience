@@ -32,6 +32,10 @@ jobs:
         run: agentresilience run experiments/refund-mcp-outage.json --output /tmp/outage.json
       - name: Schema-drift experiment
         run: agentresilience run experiments/refund-schema-drift.json --output /tmp/schema-drift.json
+      - name: MCP argument rename reproduction
+        run: |
+          agentresilience repair analyze examples/mcp-schema-rename.json --output /tmp/repair-analysis.json
+          agentresilience repair apply examples/mcp-schema-rename.json /tmp/repair-analysis.json --output /tmp/transformed-call.json
       - name: Aggregate KPIs and economics
         run: |
           agentresilience metrics /tmp/report.json /tmp/outage.json /tmp/schema-drift.json --output /tmp/metrics.json
